@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Settings · Where should we eat?{% endblock %}
+{% block body %}
+{% include "_topbar.html" %}
+<main class="page narrow">
+  <h1 class="page-title">Settings</h1>
+  {% if error %}<p class="notice error-notice" role="alert">{{ error }}</p>{% endif %}
+  {% if ok %}<p class="notice" role="status">{{ ok }} <a href="/">See them</a></p>{% endif %}
+
+  <section class="panel">
+    <h2>Where you are</h2>
+    {% if home %}
+      <p>Searching around <strong>{{ home.label or 'your location' }}</strong>
+        <span class="muted small">({{ '%.4f' | format(home.lat) }}, {{ '%.4f' | format(home.lon) }})</span></p>
+    {% else %}
+      <p class="notice">Start here: tell the site where you are so it can find restaurants nearby.</p>
+    {% endif %}
+
+    <form method="post" action="/settings/location/search" class="inline-form busy-form">
+      <label class="field grow">Address, neighborhood or ZIP code
+        <input name="address" required maxlength="200" value="{{ address or '' }}" placeholder="123 Main St, Springfield"></label>
+      <button class="btn primary" type="submit" data-busy="Looking…">Look up</button>
+    </form>
+    <p class="muted small">The address is looked up with OpenStreetMap. A nearby corner works just as
+      well as your exact address.</p>
+
+    {% if matches %}
+    <ul class="matches">
+      {% for m in matches %}
+      <li>
+        <form method="post" action="/settings/location" class="busy-form">
+          <input type="hidden" name="lat" value="{{ m.lat }}">
+          <input type="hidden" name="lon" value="{{ m.lon }}">
+          <input type="hidden" name="label" value="{{ m.label }}">
+          <span>{{ m.label }}</span>
+          <button class="btn small" type="submit" data-busy="Searching nearby…">Use this</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" action="/settings/location" id="geo-form" class="busy-form" hidden>
+      <input type="hidden" name="lat"><input type="hidden" name="lon">
+      <input type="hidden" name="label" value="This device's location">
+    </form>
+    <p><button class="btn ghost small" type="button" id="geo-btn">Use this device's location instead</button>
+      <span id="geo-msg" class="muted small" role="status"></span></p>
+  </section>
+
+  <section class="panel">
+    <h2>Restaurant search</h2>
+    <p>Source: <strong>{{ 'Google Places' if provider == 'google' else 'OpenStreetMap' }}</strong>.
+      {% if fetched_at %}Last search {{ fetched_at }}, {{ fetched_count }} places.{% endif %}</p>
+    {% if provider == 'osm' %}
+      <p class="muted small">OpenStreetMap is free and needs no account, but has no ratings, prices or
+        "open now". Put a Google Places key in <code>.env</code> to get those (see the README).</p>
+    {% endif %}
+    <form method="post" action="/settings/search" class="inline-form busy-form">
+      <label class="field">How far to search <input name="radius" type="number" step="0.5" min="0.5" max="25" value="{{ radius }}" required></label>
+      <label class="field">Units
+        <select name="unit">
+          <option value="mi" {% if unit == 'mi' %}selected{% endif %}>miles</option>
+          <option value="km" {% if unit == 'km' %}selected{% endif %}>kilometers</option>
+        </select>
+      </label>
+      <button class="btn primary" type="submit" data-busy="Searching nearby…">Save and search again</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>People</h2>
+    <p>Logins: {{ people | join(', ') }}</p>
+    <form method="post" action="/settings/person" class="inline-form">
+      <label class="field">Name <input name="name" required maxlength="40" autocomplete="off"></label>
+      <label class="field">Their password <input name="password" type="password" required minlength="{{ min_password }}" autocomplete="new-password"></label>
+      <button class="btn" type="submit">Add a login</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>Change my password</h2>
+    <form method="post" action="/settings/password" class="inline-form">
+      <label class="field">Current <input name="current" type="password" required autocomplete="current-password"></label>
+      <label class="field">New <input name="new" type="password" required minlength="{{ min_password }}" autocomplete="new-password"></label>
+      <button class="btn" type="submit">Change</button>
+    </form>
+  </section>
+</main>
+{% endblock %}

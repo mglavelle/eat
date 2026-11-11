@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Tonight · Where should we eat?{% endblock %}
+{% block body %}
+{% include "_topbar.html" %}
+<main class="page">
+  {% if known == 0 %}
+    <section class="panel empty">
+      <h1>No restaurants yet</h1>
+      <p class="muted">Nothing has been found around {{ home.label or 'your location' }} so far.</p>
+      <p><a class="btn primary" href="/settings">Go to Settings and search</a></p>
+    </section>
+  {% else %}
+  <form class="filters panel" method="get" action="/" id="filters" data-query="{{ query }}">
+    <div class="filters-top">
+      <h1>What are we in the mood for?</h1>
+      <button type="button" class="btn primary spin-btn" id="spin">Pick for us</button>
+    </div>
+
+    {% if facets.cuisines %}
+    <fieldset class="chips">
+      <legend>Food</legend>
+      {% for c in facets.cuisines %}
+        <label class="chip"><input type="checkbox" name="cuisine" value="{{ c }}" {% if c in f.cuisines %}checked{% endif %}>{{ c | capitalize }}</label>
+      {% endfor %}
+    </fieldset>
+    {% endif %}
+
+    <div class="filter-row">
+      {% if facets.kinds | length > 1 %}
+      <fieldset class="chips">
+        <legend>Kind of place</legend>
+        {% for k in facets.kinds %}
+          <label class="chip"><input type="checkbox" name="kind" value="{{ k }}" {% if k in f.kinds %}checked{% endif %}>{{ k | capitalize }}</label>
+        {% endfor %}
+      </fieldset>
+      {% endif %}
+
+      <fieldset class="chips">
+        <legend>How far</legend>
+        <label class="chip"><input type="radio" name="dist" value="" {% if not f.dist %}checked{% endif %}>Any</label>
+        {% for d in dist_choices %}
+          <label class="chip"><input type="radio" name="dist" value="{{ d }}" {% if f.dist == d %}checked{% endif %}>{{ d }} {{ unit }}</label>
+        {% endfor %}
+      </fieldset>
+
+      {% if facets.has_price %}
+      <fieldset class="chips">
+        <legend>Price</legend>
+        {% for n in [1, 2, 3, 4] %}
+          <label class="chip"><input type="checkbox" name="price" value="{{ n }}" {% if n in f.prices %}checked{% endif %}>{{ '$' * n }}</label>
+        {% endfor %}
+      </fieldset>
+      {% endif %}
+    </div>
+
+    <div class="filter-row">
+      <fieldset class="chips">
+        <legend>Us</legend>
+        <label class="chip"><input type="radio" name="show" value="" {% if f.show == 'all' %}checked{% endif %}>Everything</label>
+        <label class="chip"><input type="radio" name="show" value="liked" {% if f.show == 'liked' %}checked{% endif %}>Liked or saved</label>
+        <label class="chip"><input type="radio" name="show" value="new" {% if f.show == 'new' %}checked{% endif %}>New to us</label>
+        <label class="chip"><input type="radio" name="show" value="been" {% if f.show == 'been' %}checked{% endif %}>Been before</label>
+        <label class="chip"><input type="radio" name="show" value="hidden" {% if f.show == 'hidden' %}checked{% endif %}>Hidden</label>
+      </fieldset>
+
+      <fieldset class="chips">
+        <legend>Also</legend>
+        {% if facets.has_open %}<label class="chip"><input type="checkbox" name="open" value="1" {% if f.open_now %}checked{% endif %}>Open now</label>{% endif %}
+        <label class="chip"><input type="checkbox" name="takeout" value="1" {% if f.takeout %}checked{% endif %}>Takeout</label>
+        <label class="chip"><input type="checkbox" name="skip" value="7" {% if f.skip_days %}checked{% endif %}>Not eaten this week</label>
+      </fieldset>
+    </div>
+
+    <div class="filter-row tools">
+      <label class="field">Name <input type="search" name="q" value="{{ f.q }}" placeholder="Search by name"></label>
+      <label class="field">Order
+        <select name="sort">
+          <option value="" {% if f.sort == 'best' %}selected{% endif %}>Best for us</option>
+          <option value="near" {% if f.sort == 'near' %}selected{% endif %}>Closest</option>
+          {% if facets.has_rating %}<option value="rating" {% if f.sort == 'rating' %}selected{% endif %}>Highest rated</option>{% endif %}
+        </select>
+      </label>
+      <noscript><button class="btn" type="submit">Apply</button></noscript>
+      {% if f.active %}<a class="btn ghost small" href="/">Clear filters</a>{% endif %}
+    </div>
+  </form>
+
+  <section id="spin-result" class="spin-result" hidden aria-live="polite"></section>
+
+  <p class="count muted" id="count">
+    {% if total == 0 %}Nothing matches. Loosen a filter or two.
+    {% elif total > cards | length %}Showing the top {{ cards | length }} of {{ total }} places. "Pick for us" chooses from all {{ total }}.
+    {% else %}{{ total }} place{{ '' if total == 1 else 's' }}{% endif %}
+  </p>
+  <section class="cards" id="cards">
+    {% for p in cards %}{% include "_card.html" %}{% endfor %}
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

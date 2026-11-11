@@ -1,0 +1,22 @@
+# Where should we eat?
+#
+#   docker compose up -d        # then open http://localhost:8766
+#
+# Optional settings (Google Places key, Ollama address) go in a .env file next to this one;
+# see .env.example. On Unraid use the template in docs/unraid/ instead (docs/UNRAID.md).
+services:
+  eat:
+    image: ghcr.io/mglavelle/eat:latest
+    build: .
+    container_name: eat
+    restart: unless-stopped
+    environment:
+      DATA_DIR: /data
+      TZ: ${TZ:-America/New_York}
+      OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+      CHAT_MODEL: ${CHAT_MODEL:-qwen3.5:latest}
+      GOOGLE_PLACES_API_KEY: ${GOOGLE_PLACES_API_KEY:-}
+    volumes:
+      - ./data:/data            # eat.db and the session secret
+    ports:
+      - "8766:8000"

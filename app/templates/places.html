@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Our places · Where should we eat?{% endblock %}
+{% block body %}
+{% include "_topbar.html" %}
+<main class="page">
+  <h1 class="page-title">Our places</h1>
+
+  {% macro group(title, items, empty) %}
+  <section class="group">
+    <h2>{{ title }} <span class="muted">{{ items | length }}</span></h2>
+    {% if items %}
+      <div class="cards">{% for p in items %}{% include "_card.html" %}{% endfor %}</div>
+    {% else %}
+      <p class="muted">{{ empty }}</p>
+    {% endif %}
+  </section>
+  {% endmacro %}
+
+  {{ group('Favorites', favs, 'No favorites yet. Tap Favorite on a place you both keep going back to.') }}
+  {{ group('Want to try', wants, 'Nothing on the list yet. Tap Want to try on anything that looks good.') }}
+  {% if saved %}{{ group('Saved on Google Maps', saved, '') }}{% endif %}
+
+  <section class="group" id="history">
+    <h2>Where we've eaten <span class="muted">{{ history | length }}</span></h2>
+    {% if history %}
+    <ul class="history">
+      {% for v in history %}
+      <li>
+        <span class="day">{{ v.day }}</span>
+        <span class="name">{{ v.name }}</span>
+        <span class="muted small">{{ 'from Google' if v.source == 'google' else (v.who or '') }}</span>
+        <form method="post" action="/visits/{{ v.id }}/delete"><button class="btn ghost small" type="submit" aria-label="Remove {{ v.name }} on {{ v.day }}">Remove</button></form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+      <p class="muted">Tap We ate here after a meal. Recent places get picked less often.</p>
+    {% endif %}
+  </section>
+
+  <section class="group panel">
+    <h2>Add a place by hand</h2>
+    <p class="muted small">For somewhere the search missed. It goes on your Want to try list.</p>
+    <form method="post" action="/places/add" class="inline-form">
+      <label class="field">Name <input name="name" required maxlength="120"></label>
+      <label class="field">Food <input name="cuisines" maxlength="120" placeholder="thai, noodles"></label>
+      <label class="field grow">Address <input name="address" maxlength="200"></label>
+      <button class="btn primary" type="submit">Add</button>
+    </form>
+  </section>
+
+  {% if hidden %}{{ group('Hidden', hidden, '') }}{% endif %}
+</main>
+{% endblock %}

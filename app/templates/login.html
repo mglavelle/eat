@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Set up' if mode == 'setup' else 'Sign in' }} · Where should we eat?{% endblock %}
+{% block body_class %}login-page{% endblock %}
+{% block body %}
+<main class="login-card">
+  <div class="crest" aria-hidden="true">
+    <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="14"/><circle cx="16" cy="16" r="8" class="plate-ring"/></svg>
+  </div>
+  <h1>Where should we eat?</h1>
+  {% if mode == 'setup' %}
+    <p class="muted">First time here. Make your login; you can add your partner's on the Settings page.</p>
+  {% else %}
+    <p class="muted">So nobody has to say "I don't know, you pick."</p>
+  {% endif %}
+
+  <form method="post" action="{{ '/setup' if mode == 'setup' else '/login' }}" class="login-form">
+    <label for="name">Name</label>
+    <input id="name" name="name" autocomplete="username" required autofocus value="{{ name or '' }}" maxlength="40">
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" required
+           autocomplete="{{ 'new-password' if mode == 'setup' else 'current-password' }}">
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <button type="submit" class="btn primary">{{ 'Create my login' if mode == 'setup' else 'Sign in' }}</button>
+  </form>
+</main>
+{% endblock %}

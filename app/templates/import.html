@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Google import · Where should we eat?{% endblock %}
+{% block body %}
+{% include "_topbar.html" %}
+<main class="page narrow">
+  <h1 class="page-title">Bring in {{ me.name }}'s Google Maps history</h1>
+
+  {% if error %}<p class="notice error-notice" role="alert">{{ error }}</p>{% endif %}
+  {% if result %}
+  <p class="notice" role="status">
+    Read {{ result['items'] }} saved place{{ '' if result['items'] == 1 else 's' }} and reviews
+    ({{ result['new'] }} new). {{ result['matched'] }} match restaurants near you.
+    {% if result['visits_seen'] %}Timeline: {{ result['visits_seen'] }} stops read,
+      {{ result['visits_added'] }} meal{{ '' if result['visits_added'] == 1 else 's' }} added to
+      <a href="/places#history">where we've eaten</a>. The other stops were not kept.{% endif %}
+  </p>
+  {% endif %}
+
+  <section class="panel">
+    <p>Google does not let an app like this read your saved places or Timeline straight from your
+      account, so you download your own copy and upload it here. Each of you does this while signed
+      in as yourself. The files stay on this computer.</p>
+
+    <h2>1. Saved places and reviews</h2>
+    <ol class="steps">
+      <li>Open <a href="https://takeout.google.com" target="_blank" rel="noopener">takeout.google.com</a>
+        and choose <strong>Deselect all</strong>.</li>
+      <li>Tick <strong>Maps (your places)</strong> and <strong>Saved</strong>, then create the export.</li>
+      <li>Download the .zip Google emails you and upload it below, unopened.</li>
+    </ol>
+
+    <h2>2. Places you've actually been (optional)</h2>
+    <ol class="steps">
+      <li>On your phone, open Google Maps, tap your picture, then <strong>Your Timeline</strong>.</li>
+      <li>In the Timeline settings choose <strong>Export Timeline data</strong> and save the file.</li>
+      <li>Upload that Timeline.json below.</li>
+    </ol>
+    <p class="muted small">From the Timeline, only stops that match a restaurant in the list are kept,
+      as a date on that restaurant. Everything else in the file is discarded.
+      {% if provider == 'osm' %}Timeline stops are matched by position (within 30 m), so a stop in a
+      busy strip of shops can land on the neighbor. Remove any wrong ones under Our places.{% endif %}</p>
+
+    <form method="post" action="/import" enctype="multipart/form-data" class="upload">
+      <label class="field grow">Files (.zip, .json or .csv)
+        <input type="file" name="files" multiple required accept=".zip,.json,.csv"></label>
+      <button class="btn primary" type="submit">Upload</button>
+    </form>
+  </section>
+
+  <section class="panel">
+    <h2>What's in so far</h2>
+    {% if summary.total %}
+      <p>{{ summary.total }} saved places and reviews from you, {{ summary.matched }} matched to a
+        restaurant near you{% if summary.reviews %} ({{ summary.reviews }} are reviews you wrote){% endif %}.</p>
+      <form method="post" action="/import/clear">
+        <button class="btn ghost small" type="submit" data-confirm="This removes everything you imported from Google. Favorites and meals you logged here stay.">Remove my imported data</button>
+      </form>
+    {% else %}
+      <p class="muted">Nothing imported yet.</p>
+    {% endif %}
+  </section>
+
+  {% if summary.unmatched %}
+  <section class="panel" id="unmatched">
+    <h2>Not matched <span class="muted">{{ summary.unmatched | length }}</span></h2>
+    <p class="muted small">These are not restaurants the nearby search knows: they may be further
+      away, or parks, hotels and so on. Add the ones that are places to eat.</p>
+    <ul class="history">
+      {% for it in summary.unmatched %}
+      <li>
+        <span class="name">{{ it.name }}</span>
+        <span class="muted small">{{ it.address or it.list_name }}</span>
+        <form method="post" action="/import/add/{{ it.id }}"><button class="btn ghost small" type="submit" aria-label="Add {{ it.name }} to our places">Add</button></form>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</main>
+{% endblock %}

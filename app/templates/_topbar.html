@@ -1,0 +1,17 @@
+<header class="topbar">
+  <a class="brand" href="/">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14"/><circle cx="16" cy="16" r="8" class="plate-ring"/></svg>
+    <span>Where should we eat?</span>
+  </a>
+  <nav class="tabs" aria-label="Sections">
+    <a href="/" {% if active == 'tonight' %}aria-current="page"{% endif %}>Tonight</a>
+    <a href="/ask" {% if active == 'ask' %}aria-current="page"{% endif %}>Ask</a>
+    <a href="/places" {% if active == 'places' %}aria-current="page"{% endif %}>Our places</a>
+    <a href="/import" {% if active == 'import' %}aria-current="page"{% endif %}>Google import</a>
+    <a href="/settings" {% if active == 'settings' %}aria-current="page"{% endif %}>Settings</a>
+  </nav>
+  <div class="topbar-right">
+    <span class="who" title="Signed in as {{ me.name }}">{{ me.name }}</span>
+    <form method="post" action="/logout"><button class="btn ghost small" type="submit">Sign out</button></form>
+  </div>
+</header>

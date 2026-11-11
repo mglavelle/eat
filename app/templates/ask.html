@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Ask · Where should we eat?{% endblock %}
+{% block head %}<script src="/static/ask.js?v={{ asset_v() }}" defer></script>{% endblock %}
+{% block body %}
+{% include "_topbar.html" %}
+<main class="page narrow">
+  <section class="panel">
+    <h1>Ask for an idea</h1>
+    <p class="muted">Say what you feel like. The answer comes from the restaurants on the Tonight page,
+      your favorites and what you've eaten lately.</p>
+    <form id="ask-form" class="ask-form">
+      <label class="sr-only" for="question">What do you feel like?</label>
+      <textarea id="question" rows="2" maxlength="600" required
+                placeholder="Something cheap and cozy, not pizza again"></textarea>
+      <div class="ask-row">
+        <div class="examples">
+          <button type="button" class="chip-btn">Somewhere new, close by</button>
+          <button type="button" class="chip-btn">A favorite we haven't had in a while</button>
+          <button type="button" class="chip-btn">Quick takeout</button>
+          <button type="button" class="chip-btn">Date night</button>
+        </div>
+        <button type="submit" class="btn primary" id="ask-go">Ask</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="answer" class="panel answer" hidden aria-live="polite">
+    <p id="answer-status" class="status"></p>
+    <div id="answer-text" class="answer-text"></div>
+  </section>
+  <section id="answer-cards" class="cards"></section>
+  <p class="muted small model-note">Answered on this computer by {{ model }} through Ollama. Nothing is sent to the internet.</p>
+</main>
+{% endblock %}

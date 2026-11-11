@@ -1,0 +1,43 @@
+<article class="card{% if p.hidden %} is-hidden{% endif %}{% if p.both %} is-both{% endif %}" data-id="{{ p.id }}" data-name="{{ p.name }}">
+  <div class="card-head">
+    <h3>{{ p.name }}</h3>
+    {% if p.dist_text %}<span class="dist">{{ p.dist_text }}</span>{% endif %}
+  </div>
+  <p class="facts">
+    {%- set facts = [] -%}
+    {%- if p.cuisine_list %}{% set _ = facts.append(p.cuisine_list | join(', ')) %}{% endif -%}
+    {%- if p.kind != 'restaurant' or not p.cuisine_list %}{% set _ = facts.append(p.kind) %}{% endif -%}
+    {%- if p.price %}{% set _ = facts.append('$' * p.price) %}{% endif -%}
+    {{ facts | join(' · ') }}
+    {%- if p.rating %} · <span class="rating">★ {{ '%.1f' | format(p.rating) }}</span>{% if p.rating_count %} <span class="muted">({{ p.rating_count }})</span>{% endif %}{% endif %}
+    {%- if p.open is true %} · <span class="open">Open now</span>{% elif p.open is false %} · <span class="closed">Closed now</span>{% endif %}
+  </p>
+
+  {% if p.both or p.fans or p.wanters or p.saved_by or p.reviews or p.visits or p.hidden %}
+  <ul class="badges">
+    {% if p.hidden %}<li class="badge off">Hidden by {{ p.hidden_by | join(' and ') }}</li>{% endif %}
+    {% if p.both %}<li class="badge both">You both like this</li>{% endif %}
+    {% for n in p.fans %}<li class="badge">{{ n }}'s favorite</li>{% endfor %}
+    {% for n in p.wanters %}<li class="badge">{{ n }} wants to try</li>{% endfor %}
+    {% if p.saved_by %}<li class="badge">Saved on Google by {{ p.saved_by | join(' and ') }}</li>{% endif %}
+    {% for n, stars in p.reviews %}<li class="badge">{{ n }} rated it {{ stars }}★</li>{% endfor %}
+    {% if p.visits %}<li class="badge plain">Eaten here {{ p.visits }}× · last
+      {% if p.days_since == 0 %}today{% elif p.days_since == 1 %}yesterday{% else %}{{ p.days_since }} days ago{% endif %}</li>{% endif %}
+  </ul>
+  {% endif %}
+
+  {% if p.address or p.hours_text %}
+  <p class="where muted small">{{ p.address }}{% if p.address and p.hours_text %}<br>{% endif %}{% if p.hours_text %}<span class="hours">{{ p.hours_text }}</span>{% endif %}</p>
+  {% endif %}
+
+  <div class="actions">
+    <button class="act" data-act="mark" data-status="fav" aria-pressed="{{ 'true' if p.mine == 'fav' else 'false' }}">Favorite</button>
+    <button class="act" data-act="mark" data-status="want" aria-pressed="{{ 'true' if p.mine == 'want' else 'false' }}">Want to try</button>
+    <button class="act" data-act="visit" aria-pressed="{{ 'true' if p.ate_today else 'false' }}">{{ 'Ate here today ✓' if p.ate_today else 'We ate here' }}</button>
+    <button class="act quiet" data-act="mark" data-status="no" aria-pressed="{{ 'true' if p.mine == 'no' else 'false' }}">{{ 'Unhide' if p.mine == 'no' else 'Hide' }}</button>
+    <span class="links">
+      {% if p.maps_url %}<a href="{{ p.maps_url }}" target="_blank" rel="noopener">Map</a>{% endif %}
+      {% if p.website %}<a href="{{ p.website }}" target="_blank" rel="noopener">Website</a>{% endif %}
+    </span>
+  </div>
+</article>

@@ -1,0 +1,12 @@
+# Never bake the database or secrets into the image.
+data/
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+.claude/
+docs/

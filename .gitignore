@@ -1,0 +1,10 @@
+# Database, session secret, anything imported from Google. Never commit.
+data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
